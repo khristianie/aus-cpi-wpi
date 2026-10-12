@@ -12,13 +12,13 @@ import constants
 
 _engine = None
 
-def get_engine():
+def get_engine(echo = False):
     global _engine
 
     if _engine is None:
         _engine = create_engine(
             f"mysql+mysqlconnector://{constants.DB_USERNAME}:{constants.DB_PASSWORD}@{constants.DB_HOST}:{constants.DB_PORT}/{constants.DB_NAME}",
-            echo=False
+            echo=echo
         )
 
     return _engine

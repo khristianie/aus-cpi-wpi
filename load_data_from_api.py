@@ -3,7 +3,6 @@ import itertools
 import requests
 from pprint import pprint
 
-from sqlalchemy import create_engine, select, delete, text
 from sqlalchemy.orm import Session
 
 from models.base import Base
@@ -12,10 +11,9 @@ from models.time_period import TimePeriod
 from models.cpi_value import CpiValue
 from models.wpi_value import WpiValue
 
-engine = create_engine(
-        f"mysql+mysqlconnector://{constants.DB_USERNAME}:{constants.DB_PASSWORD}@{constants.DB_HOST}:{constants.DB_PORT}/{constants.DB_NAME}",
-        echo=True)
+from src.db import get_engine
 
+engine = get_engine(True)
 Base.metadata.create_all(engine)
 
 def retrieve_json_from_url(url):
