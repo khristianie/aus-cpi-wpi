@@ -22,7 +22,7 @@ class TimePeriod(Base):
     name = Column(String(length=100))
     start_date = Column(Date)
     end_date = Column(Date)
-    query_chunk = 50
+    query_chunk = 40
 
     cpi_values = relationship('CpiValue', back_populates='time_period')
     wpi_values = relationship('WpiValue', back_populates='time_period')
@@ -38,12 +38,21 @@ class TimePeriod(Base):
 
     @classmethod
 
-    def display_table_data(cls, engine):
+    def display_table_data(cls, engine, display_all = True):
         print('========== TIME_PERIODS ==========')
+        total = pd.read_sql_query(
+            'SELECT COUNT(*) AS count FROM time_periods',
+            engine
+        ).iloc[0]['count']
+
         counter = 0
-        query = 'SELECT * FROM time_periods'
+        query = 'SELECT * FROM time_periods ORDER BY start_date'
         for chunk in pd.read_sql_query(query, con=engine, chunksize=cls.query_chunk):
             print(f"-- from {counter}... for TIME_PERIODS")
             pprint(chunk)
             counter += cls.query_chunk
+            if not display_all and counter < total:
+                user_input = input("\nPress any key for next page, or [Q]uit: ").strip().lower()
+                if user_input == 'q':
+                    break
         print('========== TIME_PERIODS ==========')

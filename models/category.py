@@ -22,7 +22,7 @@ class Category(Base):
     name = Column(String(length=100))
     sequence = Column(Integer)
     parent_api_id = Column(String(length=10))
-    query_chunk = 50
+    query_chunk = 40
 
     cpi_values = relationship('CpiValue', back_populates='category')
 
@@ -37,12 +37,21 @@ class Category(Base):
 
     @classmethod
 
-    def display_table_data(cls, engine):
+    def display_table_data(cls, engine, display_all = True):
         print('========== CATEGORIES ==========')
+        total = pd.read_sql_query(
+            'SELECT COUNT(*) AS count FROM categories',
+            engine
+        ).iloc[0]['count']
+
         counter = 0
         query = 'SELECT * FROM categories ORDER BY sequence'
         for chunk in pd.read_sql_query(query, con=engine, chunksize=cls.query_chunk):
             print(f"-- from {counter}... for CATEGORIES")
             pprint(chunk)
             counter += cls.query_chunk
+            if not display_all and counter < total:
+                user_input = input("\nPress any key for next page, or [Q]uit: ").strip().lower()
+                if user_input == 'q':
+                    break
         print('========== CATEGORIES ==========')

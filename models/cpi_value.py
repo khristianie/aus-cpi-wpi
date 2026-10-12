@@ -19,7 +19,7 @@ class CpiValue(Base):
     __tablename__ = 'cpi_values'
 
     value = Column(Float)
-    query_chunk = 50
+    query_chunk = 40
 
     category_api_id = Column(Integer, ForeignKey('categories.api_id'), primary_key=True)
     time_period_api_id = Column(Integer, ForeignKey('time_periods.api_id'), primary_key=True)
@@ -37,12 +37,21 @@ class CpiValue(Base):
 
     @classmethod
 
-    def display_table_data(cls, engine):
+    def display_table_data(cls, engine, display_all = True):
         print('========== CPI_VALUES ==========')
+        total = pd.read_sql_query(
+            'SELECT COUNT(*) AS count FROM cpi_values',
+            engine
+        ).iloc[0]['count']
+
         counter = 0
         query = 'SELECT * FROM cpi_values'
         for chunk in pd.read_sql_query(query, con=engine, chunksize=cls.query_chunk):
             print(f"-- from {counter}... for CPI_VALUES")
             pprint(chunk)
             counter += cls.query_chunk
+            if not display_all and counter < total:
+                user_input = input("\nPress any key for next page, or [Q]uit: ").strip().lower()
+                if user_input == 'q':
+                    break
         print('========== CPI_VALUES ==========')
