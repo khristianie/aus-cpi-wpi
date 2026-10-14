@@ -183,6 +183,11 @@ def cpi_url(categories_string):
         constants.URL_PARAMS +
         f"&startPeriod={constants.START_YEAR}-{constants.START_QUARTER}&endPeriod={constants.END_YEAR}-{constants.END_QUARTER}")
 
+def all_groups_cpi_url():
+    return (constants.ALL_GROUPS_URL +
+        constants.URL_PARAMS +
+        f"&startPeriod={constants.START_YEAR}-{constants.START_QUARTER}&endPeriod={constants.END_YEAR}-{constants.END_QUARTER}")
+
 response = retrieve_json_from_url(constants.CPI_STRUCTURE_URL)
 if response:
     all_indexes_structure = parse_structures(response['data']['structures'][0], 'INDEX')
@@ -191,13 +196,16 @@ if response:
     # iterate through the indexes, in chunks of indexes call cpi url to retrieve data
     # since retrieving data all in one go results in truncated results
     # first call will need to update structure for time_period, since it was not in the first nodata structure call
+    resp = retrieve_json_from_url(all_groups_cpi_url())
+    if resp:
+        if not all_indexes_structure.get('time_period'):
+            all_indexes_structure |= parse_structures(resp['data']['structures'][0], 'TIME_PERIOD')
+            store_time_periods_to_db(all_indexes_structure)
+        store_cpi_values_to_db(resp['data']['dataSets'][0], all_indexes_structure | parse_structures(resp['data']['structures'][0], 'INDEX'))
     for chunk in itertools.batched(all_indexes_structure['indexes'], 5):
         result = "+".join(c['api_id'] for c in chunk)
         resp = retrieve_json_from_url(cpi_url(f".{result}...Q"))
         if resp:
-            if not all_indexes_structure.get('time_period'):
-                all_indexes_structure |= parse_structures(resp['data']['structures'][0], 'TIME_PERIOD')
-                store_time_periods_to_db(all_indexes_structure)
             store_cpi_values_to_db(resp['data']['dataSets'][0], all_indexes_structure | parse_structures(resp['data']['structures'][0], 'INDEX'))
 
     # now we get the wpi values
