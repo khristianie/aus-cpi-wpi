@@ -1,4 +1,5 @@
 DEFAULTS = '1....Q'
+ALL_GROUPS_URL = 'https://data.api.abs.gov.au/rest/data/ABS,CPI/1.10001.10.50.Q'
 BASE_URL = 'https://data.api.abs.gov.au/rest/data/ABS,CPI_Q,1.0.0/'
 URL_PARAMS = '?dimensionAtObservation=AllDimensions&format=jsondata'
 NODATA_URL_PARAMS = URL_PARAMS + '&detail=nodata'

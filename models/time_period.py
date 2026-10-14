@@ -56,3 +56,11 @@ class TimePeriod(Base):
                 if user_input == 'q':
                     break
         print('========== TIME_PERIODS ==========')
+
+    @classmethod
+
+    def quarter_and_previous_year(cls, engine):
+        query = 'SELECT a.api_id, b.api_id AS previous_year_api_id FROM time_periods a JOIN time_periods b ON b.start_date = a.start_date - INTERVAL 1 YEAR ORDER BY a.start_date'
+        df = pd.read_sql_query(query, con=engine)
+
+        return dict(zip(df['api_id'], df['previous_year_api_id']))
