@@ -19,6 +19,7 @@ from models.time_period import TimePeriod
 from models.wpi_value import WpiValue
 
 from src.db import get_engine
+from src.data import get_data
 
 def show_menu():
     display_menu = True
@@ -46,7 +47,7 @@ def choose_option(user_input):
         case 'D':
             display_stored_wpi_values()
         case 'E':
-            graph_cpi_yoy()
+            graph_cpi_wpi_yoy()
         case 'Q':
             goodbye()
             ret = False
@@ -68,33 +69,8 @@ def display_stored_cpi_values():
 def display_stored_wpi_values():
     WpiValue.display_table_data(get_engine(), False)
 
-def graph_cpi_yoy():
-    engine = get_engine()
-    tp_and_year_before = TimePeriod.quarter_and_previous_year(engine)
-    cpi_values = {}
-    wpi_values = {}
-
-    with Session(engine) as session:
-        cpis = session.scalars(select(CpiValue).where(CpiValue.category_api_id == '10001')).all()
-        for cpi in cpis:
-            cpi_values[cpi.time_period_api_id] = cpi.value
-        wpis = session.scalars(select(WpiValue)).all()
-        for wpi in wpis:
-            wpi_values[wpi.time_period_api_id] = wpi.value
-
-    data = []
-    for quarter, previous_quarter in tp_and_year_before.items():
-        current_cpi = cpi_values[quarter]
-        previous_cpi = cpi_values[previous_quarter]
-        current_wpi = wpi_values[quarter]
-        previous_wpi = wpi_values[previous_quarter]
-
-        if current_cpi and previous_cpi and current_wpi and previous_wpi:
-            cpi_yoy = ((current_cpi / previous_cpi) - 1) * 100
-            wpi_yoy = ((current_wpi / previous_wpi) - 1) * 100
-            data.append({'quarter': quarter, 'cpi_yoy': cpi_yoy, 'wpi_yoy': wpi_yoy})
-
-    df = pd.DataFrame(data)
+def graph_cpi_wpi_yoy():
+    df = pd.DataFrame(get_data())
     plt.figure(figsize=(12, 6))
 
     plt.plot(
