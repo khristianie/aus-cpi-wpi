@@ -11,6 +11,8 @@ END_QUARTER = 'Q2'
 
 WPI_URL = 'https://data.api.abs.gov.au/rest/data/ABS,WPI,1.2.0/1.THRPEB.7.TOT.10.AUS.Q' + URL_PARAMS
 
+VISUALISATION_FOLDER = 'output_graphs'
+
 DB_USERNAME = 'root'
 DB_PASSWORD = 'password'
 DB_HOST = 'localhost'
